@@ -17,7 +17,7 @@ fi
 
 directory="$1"
 outputFile="$2"
-program="./transform.py"
+program="./data/transform.py"
 
 # Check if directory exists
 if [[ ! -d "$directory" ]]; then

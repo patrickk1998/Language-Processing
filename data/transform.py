@@ -30,11 +30,11 @@ def split_into_words(content):
     for char in content:
         if char.isspace():
             if current_word:
-                words.append(''.join(current_word))
+                words.append(''.join(current_word).lower())
                 current_word = []
         elif char in punct:
             if current_word:
-                words.append(''.join(current_word))
+                words.append(''.join(current_word).lower())
                 current_word = []
             words.append(char)
         elif char.isalnum():

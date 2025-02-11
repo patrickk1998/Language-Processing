@@ -1,0 +1,10 @@
+[package]
+name = "ngram"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "vocab_count"
+path = "src/vocab_count.rs"
+
+
