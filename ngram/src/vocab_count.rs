@@ -79,12 +79,12 @@ where
     Dicitonary size constant, so we do not need to worry about space.
 */
 
-fn main() {
+fn main() -> Result<(), String>{
     // Get arguments
     let args: Vec<String> = env::args().collect();
     if args.len() < 3 {
         show_usage(&args[0]);
-        return;
+        return Err("Wrong Number of Arguments".into());
     }
 
     let mut vocab: HashMap<String, i32> = HashMap::new();
@@ -99,8 +99,7 @@ fn main() {
             println!("{counted} lines counted!")
         }
         Err(e) => {
-            eprintln!("Error reading file: {}", e);
-            return;
+            return Err(format!("Error reading file: {e}").into());
         }
     }
 
@@ -114,6 +113,8 @@ fn main() {
             x.0,
             (x.1 as f32) / (counted as f32) * 100.0
         ),
-        Err(e) => eprintln!("Error writing dicionary: {e}"),
+        Err(e) => return Err(format!("Error writing dicionary: {e}").into()),
     }
+
+    Ok(())
 }

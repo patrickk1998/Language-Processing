@@ -43,21 +43,20 @@ where P : AsRef<Path>, Q : AsRef<Path>
     Ok(())
 }
 
-fn main(){
+fn main() -> Result<(), String>{
 
     // Get arguments
     let args: Vec<String> = env::args().collect();
     if args.len() < 3 {
         show_usage(&args[0]);
-        return;
+        return Err("Wrong Number of Arguments".into());
     }
 
     // Get the dictionary
     let dict;
     match TokenDictionary::new(&args[1]) {
         Err(e) => { 
-            println!("Error reading dictionary {e}"); 
-            return; 
+            return Err(format!("Can not read dictionary {e}").into());
         }
         Ok(x) => {
             println!("Loaded dictionary file {}", &args[1]); 
@@ -66,7 +65,9 @@ fn main(){
     }
 
     match encode(dict, &args[2], &args[3]) {
-        Err(e) => println!("Error encoding file {e}"),
+        Err(e) => return Err(format!("Error encoding file {e}").into()),
         Ok(()) => println!("Encoded File {} as {}", &args[2], &args[3]),
     }; 
+
+    Ok(())
 }

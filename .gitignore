@@ -1,7 +1,7 @@
 # Directories used to hold data
 data/raw
 data/formated
-data/dictionary
+data/runtime
 
 # Vi swap files 
 *.swp
