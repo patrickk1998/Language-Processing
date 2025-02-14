@@ -2,16 +2,12 @@ use std::collections::HashMap;
 use std::env;
 use std::fs::File;
 use std::io::{self, BufRead, Write};
-use std::io::{Error, ErrorKind};
 use std::path::Path;
-use std::borrow::Borrow;
-use std::hash::Hash;
-use std::io::Read;
 
 mod token_dict;
 
 fn show_usage(name: &str) {
-    println!("Usage : {name} <input-file> <output-file>");
+    println!("Usage : {name} <input-file> <dicionary-file>");
 }
 
 fn count_words<P>(filename: P, vocab: &mut HashMap<String, i32>) -> io::Result<i32>

@@ -7,4 +7,6 @@ edition = "2021"
 name = "vocab_count"
 path = "src/vocab_count.rs"
 
-
+[[bin]]
+name = "binary_encoder"
+path = "src/binary_encoder.rs"

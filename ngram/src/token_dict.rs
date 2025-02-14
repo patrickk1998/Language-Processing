@@ -1,14 +1,13 @@
 use std::collections::HashMap;
-use std::env;
 use std::fs::File;
-use std::io::{self, BufRead, Write};
+use std::io::{self};
 use std::io::{Error, ErrorKind};
 use std::path::Path;
 use std::borrow::Borrow;
 use std::hash::Hash;
 use std::io::Read;
 
-struct TokenDictionary {
+pub struct TokenDictionary {
     str_to_index: HashMap<String, usize>,
     token_to_index: HashMap<u16, usize>,
     data: Vec<(String, u16)>,
@@ -16,7 +15,7 @@ struct TokenDictionary {
 
 impl TokenDictionary {
 
-    fn new<P>(filename : P) -> io::Result<Self> 
+    pub fn new<P>(filename : P) -> io::Result<Self> 
     where
         P : AsRef<Path>
     {
@@ -40,7 +39,7 @@ impl TokenDictionary {
             file.read_exact(&mut len_buf)?;
 
             let token = u16::from_le_bytes(token_buf);
-            let frequency = i32::from_le_bytes(freq_buf);
+            let _frequency = i32::from_le_bytes(freq_buf);
             let string_length = u8::from_le_bytes(len_buf) as usize;
 
             let mut string_buf = vec![0u8; string_length];
@@ -60,7 +59,7 @@ impl TokenDictionary {
         Ok(td)
     }
     
-    fn insert(&mut self, string : String, token : u16) -> Result<(), String> 
+    pub fn insert(&mut self, string : String, token : u16) -> Result<(), String> 
     {
         if self.str_to_index.contains_key(&string) || self.token_to_index.contains_key(&token) {
             return Err("TokenDictionary already contains Token or Word".to_string());
@@ -73,14 +72,14 @@ impl TokenDictionary {
         Ok(())
     }
 
-    fn get_by_str<S>(&self, string: &S) -> Option<u16> 
+    pub fn get_by_str<S>(&self, string: &S) -> Option<u16> 
     where 
         String : Borrow<S>, S :  Hash + Eq + ?Sized,
     {
         self.str_to_index.get(string).map(|&index| self.data[index].1.clone())
     }
 
-    fn get_by_token(&self, token: u16) -> Option<String> 
+    pub fn get_by_token(&self, token: u16) -> Option<String> 
     {
         self.token_to_index.get(&token).map(|&index| self.data[index].0.clone())
     }
