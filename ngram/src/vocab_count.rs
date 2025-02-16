@@ -4,7 +4,6 @@ use std::fs::File;
 use std::io::{self, BufRead, Write};
 use std::path::Path;
 
-mod token_dict;
 
 fn show_usage(name: &str) {
     println!("Usage : {name} <input-file> <dicionary-file>");
@@ -92,16 +91,15 @@ fn main() -> Result<(), String>{
 
     // execution time of this program will be dominated by this function call,
     // with time cost scaling proportional to the size of the corpus.
-    let counted;
-    match count_words(input_path, &mut vocab) {
+    let counted = match count_words(input_path, &mut vocab) {
         Ok(x) => {
-            counted = x;
-            println!("{counted} lines counted!")
+            println!("{x} lines counted!");
+            x
         }
         Err(e) => {
             return Err(format!("Error reading file: {e}").into());
         }
-    }
+    };
 
     let mut vocab_sorted: Vec<(&String, &i32)> = vocab.iter().collect();
     vocab_sorted.sort_by(|a, b| b.1.cmp(a.1));

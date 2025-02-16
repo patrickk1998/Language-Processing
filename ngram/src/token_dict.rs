@@ -1,16 +1,16 @@
 use std::collections::HashMap;
+use std::vec::Vec;
 use std::fs::File;
-use std::io::{self};
+use std::io::{self, Read, Write};
 use std::io::{Error, ErrorKind};
 use std::path::Path;
 use std::borrow::Borrow;
 use std::hash::Hash;
-use std::io::Read;
 
 pub struct TokenDictionary {
-    str_to_index: HashMap<String, usize>,
-    token_to_index: HashMap<u16, usize>,
-    data: Vec<(String, u16)>,
+    pub str_to_index: HashMap<String, usize>,
+    pub token_to_index: HashMap<u16, usize>,
+    pub data: Vec<(String, u16)>,
 }
 
 impl TokenDictionary {
@@ -19,7 +19,7 @@ impl TokenDictionary {
     where
         P : AsRef<Path>
     {
-        let mut td = Self {
+        let mut td = TokenDictionary {
             str_to_index: HashMap::new(),
             token_to_index: HashMap::new(),
             data: Vec::new(),
@@ -61,6 +61,7 @@ impl TokenDictionary {
     
     pub fn insert(&mut self, string : String, token : u16) -> Result<(), String> 
     {
+     
         if self.str_to_index.contains_key(&string) || self.token_to_index.contains_key(&token) {
             return Err("TokenDictionary already contains Token or Word".to_string());
         }
@@ -82,5 +83,103 @@ impl TokenDictionary {
     pub fn get_by_token(&self, token: u16) -> Option<String> 
     {
         self.token_to_index.get(&token).map(|&index| self.data[index].0.clone())
+    }
+}
+
+pub fn encode_token(token : u16) -> Result<[u8; 2], String>
+{
+    if token < 128 {
+        return Ok([token as u8, 0]);
+    } 
+
+    if token > 127 && token < 16510 {
+        let mut ls = token as u8;  
+        let mut ms = (token >> 7) as u8;      
+        ls = 0b10000000 | ls;
+        ms = 0b10000000 | ms;
+        return Ok([ls, ms]);
+    }
+
+    Err("Token out of range".into())
+}
+
+pub fn encoded_stream<D>(mut destination:  D, token: u16) -> Result<(), String>
+where 
+    D: Write
+{
+    let buf = match encode_token(token) {
+        Err(e) => return Err(e),
+        Ok(x) => x,
+    };
+
+    let write_result = if coded_size(buf[0]) == 1 {
+        destination.write(&buf[0..1])
+    } else {
+        destination.write(&buf[0..2])
+    };
+
+    match write_result {
+        Ok(_) => Ok(()),
+        Err(e) => Err(format!("Write error: {}", e)),
+    }
+}
+
+pub fn coded_size(b : u8) -> u8
+{
+    if (b >> 7) == 1 {
+        2 
+    } else {
+        1
+    } 
+}
+
+pub fn decode_token<S>(mut source : S ) -> io::Result<u16>
+where 
+    S : Read
+{
+    let mut byte1 = [0; 1];
+    let mut byte2 = [0; 1];
+    match source.read(&mut byte1) {
+        Err(e) => return Err(e),
+        Ok(_x) => {}
+    }
+
+    if byte1[0] < 128 {
+        return Ok(byte1[0] as u16);
+    }
+
+    match source.read(&mut byte2){
+        Err(e) => return Err(e),
+        Ok(_x) => {}
+    }
+
+    byte1[0] = (byte1[0] & 0b01111111) | (byte2[0] << 7);   
+    byte2[0] = (byte2[0] & 0b01111111) >> 1;
+    Ok( u16::from_le_bytes( [byte1[0], byte2[0]]) )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Cursor;
+
+    #[test]
+    fn test_encode_decode_tokens() {
+        let tokens = vec![10, 127, 200, 500, 1000, 16000];
+        let mut buffer = Vec::new();
+
+        for &token in &tokens {
+            encoded_stream(&mut buffer, token).expect("Encoding failed");
+        }
+
+        let mut cursor = Cursor::new(buffer);
+        let mut decoded_tokens = Vec::new();
+
+        for _ in &tokens {
+            let decoded_token = decode_token(&mut cursor).expect("Decoding failed");
+            decoded_tokens.push(decoded_token);
+        }
+
+        assert_eq!(tokens, decoded_tokens, "Decoded tokens do not match the original set!");
     }
 }

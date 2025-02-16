@@ -1,4 +1,17 @@
-[workspace]
-members = [
-    "ngram",
-]
+[package]
+name = "ngram"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "ngram_shared"
+path = "ngram/src/lib.rs"
+
+[[bin]]
+name = "vocab_count"
+path = "ngram/src/vocab_count.rs"
+
+[[bin]]
+name = "binary_encoder"
+path = "ngram/src/binary_encoder.rs"
+
