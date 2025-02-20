@@ -10,13 +10,7 @@ fn show_usage(name: &str) {
     println!("Usage : {name} <dictionary-file> <input-file> <output-file>");
 }
 
-/*
-*   The variable length encoding scheme is the following:
-*
-*   Token is > 0 and < 128 then it is encoded in one byte by 0xxxxxxx
-*   If the token is  > 127 and < 16,510 then it is encoded in two bytes 
-*   as 1xxxxxxx 1xxxxxxx.
-*/
+
 fn encode<P, Q>(dict : TokenDictionary, input_path : P, output_path : Q) -> io::Result<()>
 where P : AsRef<Path>, Q : AsRef<Path>
 {
@@ -31,11 +25,7 @@ where P : AsRef<Path>, Q : AsRef<Path>
     
     for line in reader.lines() {
         let line = line?;
-        let line_token = match dict.get_by_str(&line) {
-            None => 127, // encoding a unkown word
-            Some(x) => x,
-        };
-        
+        let line_token = dict.get_by_str(&line); 
         match token_dict::encoded_stream(&mut output_file, line_token) {
             Err(x) => {panic!("{x}");} // Panic for now!
             Ok(_) => {}
