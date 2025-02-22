@@ -15,3 +15,7 @@ path = "ngram/src/vocab_count.rs"
 name = "binary_encoder"
 path = "ngram/src/binary_encoder.rs"
 
+[[bin]]
+name = "ngram_gen"
+path = "ngram/src/ngram_gen.rs"
+
