@@ -1,0 +1,22 @@
+[build-system]
+requires = [
+    "scikit-build-core>=0.7", 
+    "cmake>=3.18",
+    "ninja",
+    "pybind11>=2.10"
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "minitorch"
+version = "0.1.0"
+description = "A mini version of pytorch."
+#readme = "README.md"
+requires-python = ">=3.8"
+#license = { file = "LICENSE" }
+dependencies = [
+    "numpy",
+]
+
+[tool.scikit-build]
+cmake.args = ["-DSOME_CUSTOM_FLAG=ON"]
