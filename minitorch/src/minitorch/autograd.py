@@ -156,68 +156,12 @@ class Ten:
     if(self.grad_fn is Grad_Fn_Accum):
       self.grad_fn.grad_zero()
 
+  def __str__(self):
+    return self.narray.__str__()
   
+  def __repr__(self):
+    return self.narray.__repr__()
 
-
-def add_grad_fn(grad_accum, grad, input):
-  grad_accum += grad
-  return grad
-
-def sum_grad_fn(grad_accum, grad, input):
-  g = np.ones(input.shape)
-  grad_accum += g
-  return g
-
-
-"""
-For adding vectors A + B, the jacobian matrix is just with respect to
-A or B is just the identity. Hence we just return the gradient that was
-passed in for each input.
-"""
-def F_add_grad_fn(position, input):
-  return [input, input]
-
-def add(a: Ten, b: Ten):
-
-  c = a.to_numpy() + b.to_numpy()
-  c = Ten(c, leaf=False)
-
-  if a.require_grad or b.require_grad:
-    c.grad_on()
-  else:
-    return c
-
-  c.grad_fn = Grad_Fn(F_add_grad_fn)
-  parents = []
-
-  if(a.require_grad):
-    parents.append(a.get_grad_fn())
-  else:
-    parents.append(None)
-  if(b.require_grad):
-    parents.append(b.get_grad_fn())
-  else:
-    parents.append(None)
-  c.grad_fn.set_parents([a.get_grad_fn(), b.get_grad_fn()])
-  c.grad_fn.set_position([a,b])
-  return c
-
-def F_sum_grad_fn(position, input) -> list[ArrayLike]:
-  return [np.ones(position[0].shape())]
-
-def sum_ten(a: Ten):
-  s = np.sum(a.to_numpy())
-  s = Ten(s, leaf=False)
-
-  if a.require_grad:
-    s.grad_on()
-  else:
-    return s
-
-  s.grad_fn = Grad_Fn_Scal(F_sum_grad_fn)
-  s.grad_fn.set_parents([a.get_grad_fn()])
-  s.grad_fn.set_position([a])
-  return s
 
 def visit(node : Grad_Fn_Node_IN, gradient):
   if(isinstance(node, Grad_Fn_Accum)):
